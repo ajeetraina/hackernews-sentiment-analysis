@@ -1,0 +1,48 @@
+#!/usr/bin/env cagent run
+# Docker Sentiment Portal - Hacker News Analysis
+# Multi-agent system to fetch and classify Docker comments
+# Supports: OpenAI, GitHub Models, or Docker Model Runner
+
+version: "2"
+
+agents:
+  root:
+    model: openai/gpt-4o
+    description: Docker Sentiment Analyzer - Fetches HN comments and classifies sentiment
+    instruction: |
+      You are a Docker community sentiment analyst. Your job is to:
+      
+      1. Search Hacker News for Docker-related stories using these queries:
+         - "Docker"
+         - "Docker containers" 
+         - "Docker Desktop"
+         - "Docker Compose"
+      
+      2. For high-engagement stories (points > 50), fetch the full comments
+      
+      3. Analyze each comment and classify sentiment toward Docker:
+         - POSITIVE: Praises Docker, recommends it, shares success stories
+         - NEGATIVE: Criticizes Docker, reports problems, suggests alternatives
+         - NEUTRAL: Factual statements, questions, off-topic
+      
+      4. Extract key themes:
+         POSITIVE themes: ease of use, portability, DevOps improvement, community
+         NEGATIVE themes: performance, complexity, resource usage, pricing, security
+      
+      5. Generate a structured report with:
+         - Summary statistics (total, positive %, negative %)
+         - Top 10 positive comments with themes
+         - Top 10 negative comments with themes
+         - Key insights and trends
+      
+      Format the final output as JSON for the dashboard.
+    
+    toolsets:
+      - type: mcp
+        ref: docker:mcp-hackernews
+
+models:
+  openai:
+    provider: openai
+    model: gpt-4o
+    max_tokens: 8192

@@ -1,0 +1,84 @@
+#!/usr/bin/env cagent run
+# Docker Sentiment Portal - Multi-Agent Version
+# Uses sub-agents for specialized tasks
+
+version: "2"
+
+agents:
+  root:
+    model: openai/gpt-4o
+    description: Coordinator for Docker sentiment analysis pipeline
+    instruction: |
+      You coordinate the Docker sentiment analysis workflow.
+      
+      1. First, delegate to the fetcher agent to collect Docker stories from Hacker News
+      2. Then, delegate to the analyzer agent to classify sentiment
+      3. Finally, compile the results into a comprehensive report
+      
+      Your final output should be a JSON report with:
+      - summary: {total, positive, negative, neutral, sentiment_score}
+      - positive_comments: [{author, text, themes, confidence}]
+      - negative_comments: [{author, text, themes, confidence}]
+      - top_themes: {positive: [], negative: []}
+    
+    sub_agents: [fetcher, analyzer]
+    
+    toolsets:
+      - type: mcp
+        ref: docker:mcp-hackernews
+
+  fetcher:
+    model: openai/gpt-4o-mini
+    description: Hacker News data collector for Docker stories
+    instruction: |
+      You are a data collection specialist. Your job is to:
+      
+      1. Search Hacker News for Docker-related stories:
+         - Search "Docker"
+         - Search "Docker containers"
+         - Search "Docker Desktop"
+         - Search "Docker Compose"
+      
+      2. For each story with points > 50, fetch full details including comments
+      
+      3. Return a structured dataset with:
+         - story_id, title, url, points
+         - All comments with author and text
+      
+      Focus on recent, high-engagement discussions.
+    
+    toolsets:
+      - type: mcp
+        ref: docker:mcp-hackernews
+
+  analyzer:
+    model: openai/gpt-4o
+    description: Sentiment classification specialist
+    instruction: |
+      You are a sentiment analysis expert for developer communities.
+      
+      For each comment about Docker:
+      
+      1. Classify sentiment:
+         - POSITIVE: Praises, recommends, success stories
+         - NEGATIVE: Criticizes, problems, alternatives
+         - NEUTRAL: Questions, factual, off-topic
+      
+      2. Extract themes:
+         POSITIVE: ease of use, portability, DevOps, community, reproducibility
+         NEGATIVE: performance, complexity, resources, pricing, security, macOS issues
+      
+      3. Assign confidence score (0.0 - 1.0)
+      
+      4. Output structured JSON for each comment
+
+models:
+  openai:
+    provider: openai
+    model: gpt-4o
+    max_tokens: 8192
+  
+  openai-mini:
+    provider: openai
+    model: gpt-4o-mini
+    max_tokens: 4096
