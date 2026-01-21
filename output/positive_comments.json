@@ -1,0 +1,16 @@
+[
+  {
+    "rank": 1,
+    "author": "devops_pro",
+    "text": "Docker has completely transformed our deployment pipeline. What used to take hours now takes minutes.",
+    "themes": ["DevOps Workflow", "Ease of Use"],
+    "confidence": 0.95
+  },
+  {
+    "rank": 2,
+    "author": "container_fan",
+    "text": "The portability is incredible. Same container runs on my Mac, Linux server, and AWS without any changes.",
+    "themes": ["Portability", "Cross-platform"],
+    "confidence": 0.92
+  }
+]

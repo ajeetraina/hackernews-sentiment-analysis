@@ -1,0 +1,16 @@
+[
+  {
+    "rank": 1,
+    "author": "skeptical_dev",
+    "text": "Docker Desktop's new pricing model is pushing small teams away. The performance overhead on macOS is still noticeable.",
+    "themes": ["Docker Desktop Pricing", "Performance Overhead"],
+    "confidence": 0.88
+  },
+  {
+    "rank": 2,
+    "author": "linux_native",
+    "text": "For simple apps, Docker adds unnecessary complexity. Sometimes a shell script and systemd is all you need.",
+    "themes": ["Complexity", "Over-engineering"],
+    "confidence": 0.85
+  }
+]

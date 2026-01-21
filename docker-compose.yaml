@@ -1,0 +1,19 @@
+# Docker Compose for Sentiment Portal with Web Dashboard
+# Run: docker compose up -d
+# Access: http://localhost:8080
+
+services:
+  # Web Dashboard
+  dashboard:
+    image: nginx:alpine
+    container_name: sentiment-dashboard
+    ports:
+      - "8080:80"
+    volumes:
+      - ./output:/usr/share/nginx/html/data:ro
+      - ./templates/index.html:/usr/share/nginx/html/index.html:ro
+    restart: unless-stopped
+
+networks:
+  default:
+    name: sentiment-network

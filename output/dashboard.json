@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-01-21T10:30:00Z",
+  "summary": {
+    "total": 156,
+    "positive": 67,
+    "negative": 52,
+    "neutral": 37,
+    "sentiment_score": 0.18
+  },
+  "top_positive_themes": [
+    {"theme": "Ease of Use", "count": 24},
+    {"theme": "Portability", "count": 19},
+    {"theme": "DevOps Workflow", "count": 15},
+    {"theme": "Community", "count": 12},
+    {"theme": "Reproducibility", "count": 8}
+  ],
+  "top_negative_themes": [
+    {"theme": "Performance Overhead", "count": 18},
+    {"theme": "Resource Usage", "count": 14},
+    {"theme": "Docker Desktop Pricing", "count": 11},
+    {"theme": "Complexity", "count": 9},
+    {"theme": "Security Concerns", "count": 7}
+  ]
+}

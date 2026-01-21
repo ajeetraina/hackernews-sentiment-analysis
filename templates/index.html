@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Sentiment Portal - Hacker News Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .positive { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .negative { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .neutral { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
+        .card { transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <header class="bg-gray-800 border-b border-gray-700 py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <svg class="w-10 h-10 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.186.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.186.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.186.186 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/>
+                    </svg>
+                    <div>
+                        <h1 class="text-2xl font-bold">Docker Sentiment Portal</h1>
+                        <p class="text-gray-400 text-sm">Hacker News Community Analysis</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-400">Powered by</p>
+                    <p class="font-semibold text-blue-400">Docker cagent + MCP</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <p class="text-gray-400 text-sm mb-1">Total Comments</p>
+                <p class="text-3xl font-bold" id="totalComments">--</p>
+            </div>
+            <div class="card positive rounded-xl p-6">
+                <p class="text-green-100 text-sm mb-1">Positive</p>
+                <p class="text-3xl font-bold" id="positiveCount">--</p>
+                <p class="text-green-200 text-sm" id="positivePercent">--%</p>
+            </div>
+            <div class="card negative rounded-xl p-6">
+                <p class="text-red-100 text-sm mb-1">Negative</p>
+                <p class="text-3xl font-bold" id="negativeCount">--</p>
+                <p class="text-red-200 text-sm" id="negativePercent">--%</p>
+            </div>
+            <div class="card neutral rounded-xl p-6">
+                <p class="text-gray-100 text-sm mb-1">Neutral</p>
+                <p class="text-3xl font-bold" id="neutralCount">--</p>
+                <p class="text-gray-200 text-sm" id="neutralPercent">--%</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Overall Sentiment Score</h2>
+            <div class="flex items-center">
+                <div class="flex-1 bg-gray-700 rounded-full h-4 overflow-hidden">
+                    <div id="sentimentBar" class="h-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+                <span id="sentimentScore" class="ml-4 text-2xl font-bold">0.0</span>
+            </div>
+            <div class="flex justify-between mt-2 text-sm text-gray-400">
+                <span>Very Negative (-1.0)</span>
+                <span>Neutral (0.0)</span>
+                <span>Very Positive (+1.0)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4">Sentiment Distribution</h2>
+                <canvas id="sentimentPie"></canvas>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4">Top Themes</h2>
+                <canvas id="themesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div class="positive p-4">
+                    <h2 class="text-xl font-semibold">👍 Positive Comments</h2>
+                </div>
+                <div id="positiveComments" class="p-4 space-y-4 max-h-96 overflow-y-auto">
+                    <p class="text-gray-400">Loading...</p>
+                </div>
+            </div>
+            <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div class="negative p-4">
+                    <h2 class="text-xl font-semibold">👎 Negative Comments</h2>
+                </div>
+                <div id="negativeComments" class="p-4 space-y-4 max-h-96 overflow-y-auto">
+                    <p class="text-gray-400">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>Generated by Docker cagent with mcp-hackernews MCP Server</p>
+            <p id="generatedAt" class="mt-1">Last updated: --</p>
+        </footer>
+    </main>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/data/dashboard.json');
+                const data = await response.json();
+                
+                document.getElementById('totalComments').textContent = data.summary.total;
+                document.getElementById('positiveCount').textContent = data.summary.positive;
+                document.getElementById('negativeCount').textContent = data.summary.negative;
+                document.getElementById('neutralCount').textContent = data.summary.neutral;
+                
+                const total = data.summary.total || 1;
+                document.getElementById('positivePercent').textContent = ((data.summary.positive / total) * 100).toFixed(1) + '%';
+                document.getElementById('negativePercent').textContent = ((data.summary.negative / total) * 100).toFixed(1) + '%';
+                document.getElementById('neutralPercent').textContent = ((data.summary.neutral / total) * 100).toFixed(1) + '%';
+                
+                const score = data.summary.sentiment_score || 0;
+                const scorePercent = ((score + 1) / 2) * 100;
+                document.getElementById('sentimentScore').textContent = score.toFixed(2);
+                const sentimentBar = document.getElementById('sentimentBar');
+                sentimentBar.style.width = scorePercent + '%';
+                sentimentBar.className = `h-full transition-all duration-500 ${score > 0.2 ? 'bg-green-500' : score < -0.2 ? 'bg-red-500' : 'bg-gray-500'}`;
+                
+                document.getElementById('generatedAt').textContent = 'Last updated: ' + new Date(data.generated_at).toLocaleString();
+                
+                new Chart(document.getElementById('sentimentPie'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Positive', 'Negative', 'Neutral'],
+                        datasets: [{ data: [data.summary.positive, data.summary.negative, data.summary.neutral], backgroundColor: ['#10b981', '#ef4444', '#6b7280'] }]
+                    },
+                    options: { plugins: { legend: { labels: { color: '#fff' } } } }
+                });
+                
+                const themes = [...(data.top_positive_themes || []).slice(0, 5).map(t => ({...t, type: 'positive'})), ...(data.top_negative_themes || []).slice(0, 5).map(t => ({...t, type: 'negative'}))];
+                new Chart(document.getElementById('themesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: themes.map(t => t.theme || t.name || t),
+                        datasets: [{ label: 'Mentions', data: themes.map(t => t.count || 1), backgroundColor: themes.map(t => t.type === 'positive' ? '#10b981' : '#ef4444') }]
+                    },
+                    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } }, y: { ticks: { color: '#9ca3af' }, grid: { display: false } } } }
+                });
+                
+                loadComments('positive');
+                loadComments('negative');
+            } catch (error) { console.error('Error loading dashboard:', error); }
+        }
+        
+        async function loadComments(type) {
+            try {
+                const response = await fetch(`/data/${type}_comments.json`);
+                const comments = await response.json();
+                const container = document.getElementById(`${type}Comments`);
+                container.innerHTML = comments.slice(0, 10).map(comment => `
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-sm font-medium text-blue-400">@${comment.author}</span>
+                            <span class="text-xs text-gray-400">${(comment.confidence * 100).toFixed(0)}% confidence</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mb-2">${comment.text.substring(0, 200)}${comment.text.length > 200 ? '...' : ''}</p>
+                        <div class="flex flex-wrap gap-1">
+                            ${(comment.themes || []).map(theme => `<span class="px-2 py-1 text-xs rounded ${type === 'positive' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${theme}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { console.error(`Error loading ${type} comments:`, error); }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+        setInterval(loadDashboard, 300000);
+    </script>
+</body>
+</html>

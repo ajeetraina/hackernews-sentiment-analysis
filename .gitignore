@@ -1,0 +1,14 @@
+# Environment
+.env
+
+# Output files (generated)
+output/*.json
+!output/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
